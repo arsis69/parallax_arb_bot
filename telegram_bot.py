@@ -74,13 +74,12 @@ def format_opportunities():
         # Format top 10 only
         for idx, opp in enumerate(opportunities[:10], 1):
             profit_pct = opp['profit_pct']
-            profit = opp['profit']
 
             buy_yes = opp['buy_yes']
             buy_no = opp['buy_no']
 
-            # Clean title (remove non-ASCII)
-            title = buy_yes['title'][:50]
+            # Clean title (remove non-ASCII, keep full length)
+            title = buy_yes['title']
             title = ''.join(c for c in title if ord(c) < 128)
 
             # Calculate YES + NO sum
@@ -92,16 +91,14 @@ def format_opportunities():
 <i>{title}</i>
 
 YES + NO = <b>${arb_sum:.4f}</b>
-Profit: <b>${profit:.4f}</b>
 
-<b>BUY YES</b> @ {buy_yes['platform'].upper()}
+<b>Yes - {buy_yes['platform'].title()}</b>
 ${buy_yes['price']:.4f}
 <a href="{buy_yes['link']}">Open Market</a>
 
-<b>BUY NO</b> @ {buy_no['platform'].upper()}
+<b>No - {buy_no['platform'].title()}</b>
 ${buy_no['price']:.4f}
-<a href="{buy_no['link']}">Open Market</a>
-{"─" * 30}"""
+<a href="{buy_no['link']}">Open Market</a>"""
             messages.append(msg)
 
         return messages, None
