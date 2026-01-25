@@ -20,7 +20,7 @@ The bot finds "riskless" arbitrage opportunities by:
 - **Opinion Trade** (opinion.trade)
 - **Predict.fun** (predict.fun)
 - **Probable Markets** (probable.markets)
-- **Polymarket** (polymarket.com) - extraction only
+- **Polymarket** (polymarket.com) - disabled
 - **Limitless Exchange** (limitless.exchange) - disabled
 
 ## Quick Start
