@@ -1,0 +1,42 @@
+# Environment
+.env
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+.idea/
+.claude/
+
+# Large data files (regenerated at runtime)
+market_embeddings.json
+three_platforms_complete.json
+similar_options_embeddings.json
+similar_options_validated_ai.json
+rejected_matches_report.json
+final_arbitrage_clean.json
+
+# Platform market data (regenerated)
+predict_markets_fixed.json
+probable_markets.json
+all_tradeable_options.json
+polymarket_options_complete.json
+limitless_markets_complete.json
+
+# Credentials
+probable_credentials.json
+
+# Logs
+*.log
+bot_run.log
+nul
+
+# Old/temp files
+output/*.json
+history.json
+test*.py
