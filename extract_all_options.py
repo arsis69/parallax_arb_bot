@@ -221,7 +221,7 @@ class OptionExtractor:
 def main():
     """Extract all options from all platforms"""
     print("\n" + "="*80)
-    print("EXTRACTING ALL TRADEABLE OPTIONS FROM ALL PLATFORMS")
+    print("EXTRACTING OPINION OPTIONS")
     print("="*80)
 
     extractor = OptionExtractor()
@@ -233,23 +233,10 @@ def main():
     all_options.extend(opinion_options)
     print(f"  Total Opinion options: {len(opinion_options)}")
 
-    # Polymarket (from saved data)
-    print("\n[POLYMARKET]")
-    polymarket_options = extractor.extract_polymarket_options()
-    all_options.extend(polymarket_options)
-    print(f"  Total Polymarket options: {len(polymarket_options)}")
-
-    # Limitless (from saved data)
-    print("\n[LIMITLESS]")
-    limitless_options = extractor.extract_limitless_options()
-    all_options.extend(limitless_options)
-    print(f"  Total Limitless options: {len(limitless_options)}")
-
-    # Predict (from saved data)
-    print("\n[PREDICT]")
-    predict_options = extractor.extract_predict_options()
-    all_options.extend(predict_options)
-    print(f"  Total Predict options: {len(predict_options)}")
+    # NOTE: Polymarket/Limitless/Predict extraction disabled
+    # - Predict is handled by extract_predict_fixed.py
+    # - Probable is handled by extract_probable_options.py
+    # - Polymarket/Limitless not currently used
 
     # Save results
     output_file = "all_tradeable_options.json"
@@ -259,12 +246,8 @@ def main():
     print(f"\n{'='*80}")
     print(f"SUMMARY")
     print(f"{'='*80}")
-    print(f"Total tradeable options extracted: {len(all_options)}")
-    print(f"  Opinion: {len([o for o in all_options if o['platform'] == 'opinion'])}")
-    print(f"  Polymarket: {len([o for o in all_options if o['platform'] == 'polymarket'])}")
-    print(f"  Limitless: {len([o for o in all_options if o['platform'] == 'limitless'])}")
-    print(f"  Predict: {len([o for o in all_options if o['platform'] == 'predict'])}")
-    print(f"\nSaved to: {output_file}")
+    print(f"Total Opinion options extracted: {len(all_options)}")
+    print(f"Saved to: {output_file}")
     print(f"{'='*80}\n")
 
 
