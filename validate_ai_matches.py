@@ -89,9 +89,17 @@ def extract_numbers(text):
         elif unit in ['t', 'trillion']:
             numbers.add(f"{amount}T")
 
-    # Decimal thresholds: "9.0", "10.0"
-    pattern4 = r'\b(\d+\.\d+)\b'
+    # Stock prices and simple dollar amounts: "$150", "$200", "$1500"
+    pattern4 = r'\$(\d+(?:,\d{3})*(?:\.\d+)?)\b'
     matches = re.finditer(pattern4, text)
+    for match in matches:
+        # Remove commas and add $ prefix
+        amount = match.group(1).replace(',', '')
+        numbers.add(f"${amount}")
+
+    # Decimal thresholds: "9.0", "10.0"
+    pattern5 = r'\b(\d+\.\d+)\b'
+    matches = re.finditer(pattern5, text)
     for match in matches:
         numbers.add(match.group(1))
 
