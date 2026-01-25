@@ -65,24 +65,10 @@ def run_extraction(task):
 
 
 def fetch_fresh_data(force_full=False):
-    """Run the arbitrage pipeline. Uses quick mode if data is recent."""
+    """Run the arbitrage pipeline. Always does full refresh for accuracy."""
     print("\n" + "=" * 100)
 
-    # Check if we can use quick mode (just refresh prices)
-    if not force_full and is_data_fresh():
-        print(" " * 30 + "QUICK REFRESH (prices only)")
-        print("=" * 100)
-        print("\n>> Market data is recent, refreshing prices only...")
-
-        # Run price fetching on all matches (no --fast, we need all opportunities)
-        run_command("python final_arb_finder_clean.py", "Fetching fresh prices")
-
-        print("\n" + "=" * 100)
-        print(" " * 35 + "QUICK REFRESH COMPLETE")
-        print("=" * 100)
-        return
-
-    # FULL REFRESH
+    # FULL REFRESH (quick mode disabled - was causing wrong price matching)
     print(" " * 30 + "FULL DATA REFRESH")
     print("=" * 100)
 
