@@ -200,23 +200,19 @@ async def main():
     """Main entry point"""
     if not TELEGRAM_BOT_TOKEN:
         print("ERROR: TELEGRAM_BOT_TOKEN not set in .env")
-        print("
-To set up:")
+        print("\nTo set up:")
         print("1. Message @BotFather on Telegram")
         print("2. Send /newbot and follow instructions")
         print("3. Copy the token to your .env file:")
         print("   TELEGRAM_BOT_TOKEN=your_token_here")
         return
 
-    print("
-" + "=" * 50)
+    print("\n" + "=" * 50)
     print("TELEGRAM ARBITRAGE BOT")
     print("=" * 50)
     print(f"Token: {TELEGRAM_BOT_TOKEN[:10]}...")
-    print("
-Send /start to scan for opportunities")
-    print("=" * 50 + "
-")
+    print("\nSend /start to scan for opportunities")
+    print("=" * 50 + "\n")
 
     await handle_updates()
 
