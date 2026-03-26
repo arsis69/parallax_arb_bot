@@ -45,7 +45,7 @@ def run_pipeline(platforms):
             shell=True,
             capture_output=True,
             text=True,
-            encoding='utf-utf-8',
+            encoding='utf-8',
             errors='ignore',
             timeout=600
         )
