@@ -9,15 +9,17 @@ import subprocess
 import asyncio
 from datetime import datetime
 from dotenv import load_dotenv
+import aiohttp # Added for send_message
+import sys # Added for passing arguments to main_bot.py
 
 load_dotenv()
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 
-async def send_message(chat_id, text):
+async def send_message(chat_id, text, reply_markup=None):
     """Send a message via Telegram API"""
-    import aiohttp
+    # Removed local import of aiohttp as it's now imported at the top
 
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {
@@ -26,22 +28,24 @@ async def send_message(chat_id, text):
         "parse_mode": "HTML",
         "disable_web_page_preview": True
     }
+    if reply_markup:
+        payload["reply_markup"] = reply_markup
 
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=payload) as resp:
             return resp.status == 200
 
 
-def run_pipeline():
-    """Run the main arbitrage pipeline"""
-    print(f"[{datetime.now()}] Running pipeline...")
+def run_pipeline(platforms):
+    """Run the main arbitrage pipeline with selected platforms"""
+    print(f"[{datetime.now()}] Running pipeline for {platforms}...")
     try:
         result = subprocess.run(
-            "python main_bot.py",
+            f"python main_bot.py {platforms}",
             shell=True,
             capture_output=True,
             text=True,
-            encoding='utf-8',
+            encoding='utf-utf-8',
             errors='ignore',
             timeout=600
         )
@@ -126,8 +130,6 @@ async def send_opportunities(chat_id):
 
 async def handle_updates():
     """Long polling for Telegram updates"""
-    import aiohttp
-
     offset = 0
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates"
 
@@ -147,21 +149,41 @@ async def handle_updates():
                 for update in data.get("result", []):
                     offset = update["update_id"] + 1
 
-                    message = update.get("message", {})
-                    chat_id = message.get("chat", {}).get("id")
-                    text = message.get("text", "")
+                    # Handle Message
+                    if "message" in update:
+                        message = update["message"]
+                        chat_id = message.get("chat", {}).get("id")
+                        text = message.get("text", "")
 
-                    if not chat_id or not text:
-                        continue
+                        if not chat_id or not text:
+                            continue
 
-                    if text == "/start":
-                        print(f"[{datetime.now()}] /start from {chat_id}")
+                        if text == "/start":
+                            print(f"[{datetime.now()}] /start from {chat_id}")
+                            
+                            # Create inline keyboard for platform selection
+                            keyboard = {
+                                "inline_keyboard": [
+                                    [{"text": "Limitless + Polymarket", "callback_data": "limitless,polymarket"}],
+                                    [{"text": "Predict + Polymarket", "callback_data": "predict,polymarket"}],
+                                    [{"text": "Limitless + Predict", "callback_data": "limitless,predict"}]
+                                ]
+                            }
+                            await send_message(chat_id, "<b>Select platform combination:</b>", reply_markup=json.dumps(keyboard))
 
-                        await send_message(chat_id, "Running arbitrage scan...")
+                    # Handle Callback Query
+                    elif "callback_query" in update:
+                        callback_query = update["callback_query"]
+                        chat_id = callback_query["message"]["chat"]["id"]
+                        data_platforms = callback_query["data"]
+                        
+                        print(f"[{datetime.now()}] Selection from {chat_id}: {data_platforms}")
+
+                        await send_message(chat_id, f"Running arbitrage scan for <b>{data_platforms.upper()}</b>...")
 
                         # Run pipeline
                         loop = asyncio.get_event_loop()
-                        success = await loop.run_in_executor(None, run_pipeline)
+                        success = await loop.run_in_executor(None, run_pipeline, data_platforms)
 
                         if success:
                             await send_opportunities(chat_id)
@@ -178,19 +200,23 @@ async def main():
     """Main entry point"""
     if not TELEGRAM_BOT_TOKEN:
         print("ERROR: TELEGRAM_BOT_TOKEN not set in .env")
-        print("\nTo set up:")
+        print("
+To set up:")
         print("1. Message @BotFather on Telegram")
         print("2. Send /newbot and follow instructions")
         print("3. Copy the token to your .env file:")
         print("   TELEGRAM_BOT_TOKEN=your_token_here")
         return
 
-    print("\n" + "=" * 50)
+    print("
+" + "=" * 50)
     print("TELEGRAM ARBITRAGE BOT")
     print("=" * 50)
     print(f"Token: {TELEGRAM_BOT_TOKEN[:10]}...")
-    print("\nSend /start to scan for opportunities")
-    print("=" * 50 + "\n")
+    print("
+Send /start to scan for opportunities")
+    print("=" * 50 + "
+")
 
     await handle_updates()
 

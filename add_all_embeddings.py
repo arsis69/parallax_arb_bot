@@ -3,13 +3,14 @@ Generate embeddings for ALL new markets (Opinion, Predict, Limitless)
 """
 import json
 import os
+import time
 import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 
-def batch_get_embeddings(texts, batch_size=100):
-    """Get embeddings from OpenRouter API"""
+def batch_get_embeddings(texts, batch_size=100, max_retries=3):
+    """Get embeddings from OpenRouter API with retry logic"""
     api_key = os.getenv("OPENROUTER_API_KEY")
     if not api_key:
         raise ValueError("OPENROUTER_API_KEY not found in environment")
@@ -19,24 +20,34 @@ def batch_get_embeddings(texts, batch_size=100):
     for i in range(0, len(texts), batch_size):
         batch = texts[i:i+batch_size]
 
-        response = requests.post(
-            "https://openrouter.ai/api/v1/embeddings",
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": "text-embedding-3-small",
-                "input": batch
-            },
-            timeout=60
-        )
+        for attempt in range(max_retries):
+            try:
+                response = requests.post(
+                    "https://openrouter.ai/api/v1/embeddings",
+                    headers={
+                        "Authorization": f"Bearer {api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "model": "text-embedding-3-small",
+                        "input": batch
+                    },
+                    timeout=60
+                )
 
-        data = response.json()
-        embeddings = [item["embedding"] for item in data["data"]]
-        all_embeddings.extend(embeddings)
+                data = response.json()
+                embeddings = [item["embedding"] for item in data["data"]]
+                all_embeddings.extend(embeddings)
 
-        print(f"  Generated embeddings {i+1}-{min(i+batch_size, len(texts))}/{len(texts)}")
+                print(f"  Generated embeddings {i+1}-{min(i+batch_size, len(texts))}/{len(texts)}")
+                break
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    wait = 5 * (attempt + 1)
+                    print(f"  Retry {attempt+1}/{max_retries} after error: {e} (waiting {wait}s)")
+                    time.sleep(wait)
+                else:
+                    raise
 
     return all_embeddings
 
@@ -60,6 +71,14 @@ def main():
     except FileNotFoundError:
         existing_embeddings = []
         print("No existing embeddings found")
+
+    # Prune stale embeddings (markets that no longer exist in current data)
+    current_titles = {m['title'] for m in all_markets}
+    before_prune = len(existing_embeddings)
+    existing_embeddings = [e for e in existing_embeddings if e['title'] in current_titles]
+    pruned_count = before_prune - len(existing_embeddings)
+    if pruned_count > 0:
+        print(f"Pruned {pruned_count} stale embeddings (markets no longer in current data)")
 
     # Find markets without embeddings
     existing_titles = {e['title'] for e in existing_embeddings}

@@ -54,6 +54,13 @@ def fetch_all_markets():
 
                 for m in cat_markets:
                     market_id = m.get('id')
+                    
+                    # Exclude opinion and probable markets
+                    title_check = m.get('title', '').lower()
+                    question_check = m.get('question', '').lower()
+                    if 'opinion' in title_check or 'opinion' in question_check or 'probable' in title_check or 'probable' in question_check:
+                        continue
+                        
                     if market_id and market_id not in seen_ids:
                         # Add category info to market
                         m['categorySlug'] = cat_slug
@@ -104,6 +111,12 @@ def fetch_all_markets():
             for m in markets:
                 market_id = m.get('id')
                 market_status = m.get('status', '')
+
+                # Exclude opinion and probable markets
+                title_check = m.get('title', '').lower()
+                question_check = m.get('question', '').lower()
+                if 'opinion' in title_check or 'opinion' in question_check or 'probable' in title_check or 'probable' in question_check:
+                    continue
 
                 # Only add ACTIVE markets (not RESOLVED) that we haven't seen
                 # Active statuses: REGISTERED, PRICE_PROPOSED, PRICE_DISPUTED, PAUSED, UNPAUSED

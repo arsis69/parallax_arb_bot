@@ -26,6 +26,7 @@ predict_markets_fixed.json
 probable_markets.json
 all_tradeable_options.json
 polymarket_options_complete.json
+polymarket_markets.json
 limitless_markets_complete.json
 
 # Credentials

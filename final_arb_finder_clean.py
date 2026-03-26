@@ -244,9 +244,13 @@ def get_market_link(market):
         return f"https://app.opinion.trade/detail?topicId={topic_id}"
 
     elif platform == 'polymarket':
-        slug = market.get('slug', '')
-        slug = slug.split('?')[0]  # Remove query parameters
-        return f"https://polymarket.com/event/{slug}"
+        # Use pre-built url if available, otherwise build from event_slug
+        url = market.get('url', '')
+        if url:
+            return url
+        event_slug = market.get('event_slug', market.get('slug', ''))
+        event_slug = event_slug.split('?')[0]
+        return f"https://polymarket.com/event/{event_slug}"
 
     elif platform == 'limitless':
         slug = market.get('slug', '')

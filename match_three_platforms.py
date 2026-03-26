@@ -8,7 +8,7 @@ import numpy as np
 from collections import Counter
 
 print("\n" + "="*80)
-print("MATCHING PLATFORMS: Opinion + Predict + Probable")
+print("MATCHING PLATFORMS: Predict + Polymarket")
 print("="*80)
 
 # Load markets
@@ -39,7 +39,7 @@ for m in markets_with_emb:
         by_platform[p] = []
     by_platform[p].append(m)
 
-THRESHOLD = 0.90
+THRESHOLD = 0.97  # Raised from 0.90 to reduce false positives
 matches = []
 
 # For each pair of platforms, do efficient matrix comparison
@@ -81,7 +81,7 @@ for i, p1 in enumerate(platform_list):
 # Sort by similarity
 matches.sort(key=lambda x: x['similarity'], reverse=True)
 
-print(f"\nFound {len(matches)} matches at {THRESHOLD*100}% threshold")
+print(f"\nFound {len(matches)} matches at {THRESHOLD*100:.0f}% threshold")
 
 # Save
 with open('similar_options_embeddings.json', 'w', encoding='utf-8') as f:
