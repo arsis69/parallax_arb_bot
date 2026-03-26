@@ -78,6 +78,16 @@ def extract_numbers(text):
     for match in matches:
         numbers.add(f"threshold_{match.group(1)}")
 
+    # Plain standalone numbers (catch things like '6 Fed rate cuts' vs '1 Fed rate cut')
+    pattern_plain = r'\b(\d+(?:\.\d+)?)\b'
+    matches = re.finditer(pattern_plain, text)
+    for match in matches:
+        num_str = match.group(1)
+        # Skip 202x years to avoid false mismatches if one platform omits the year
+        if num_str.startswith('202') and len(num_str) == 4:
+            continue
+        numbers.add(num_str)
+
     return numbers
 
 
@@ -315,11 +325,10 @@ def extract_event_context(market):
         teams = tuple(sorted(match))
         context.add(f'matchup_{"_".join(teams)}')
 
-    # Extract full event slug as unique identifier
-    if event_slug:
-        context.add(f'event_{event_slug}')
-    elif category_slug:
-        context.add(f'event_{category_slug}')
+    # Extract date from slug: YYYY-MM-DD
+    slug_date_match = re.search(r'\b(20\d{2}-\d{2}-\d{2})\b', all_identifiers)
+    if slug_date_match:
+        context.add(f'slug_date_{slug_date_match.group(1)}')
 
     return context
 
@@ -353,12 +362,12 @@ def validate_match(market_a, market_b, similarity):
     event_ctx_b = extract_event_context(market_b)
 
     # Rule 0: Event context MUST match if detected (prevents different games of same team)
-    # Only check if BOTH have event identifiers
-    events_a = {x for x in event_ctx_a if x.startswith('event_')}
-    events_b = {x for x in event_ctx_b if x.startswith('event_')}
-    if events_a and events_b:
-        if not events_a.intersection(events_b):
-            return False, f"Different events: {events_a} vs {events_b}"
+    # Only check if BOTH have event identifiers (we now check slug_date instead of full event_slug)
+    slug_dates_a = {x for x in event_ctx_a if x.startswith('slug_date_')}
+    slug_dates_b = {x for x in event_ctx_b if x.startswith('slug_date_')}
+    if slug_dates_a and slug_dates_b:
+        if not slug_dates_a.intersection(slug_dates_b):
+            return False, f"Different events (slug dates): {slug_dates_a} vs {slug_dates_b}"
 
     # Rule 1: Numbers MUST match if both have them
     if numbers_a and numbers_b:

@@ -39,7 +39,7 @@ for m in markets_with_emb:
         by_platform[p] = []
     by_platform[p].append(m)
 
-THRESHOLD = 0.97  # Raised from 0.90 to reduce false positives
+THRESHOLD = 0.92  # Raised from 0.90 to reduce false positives
 matches = []
 
 # For each pair of platforms, do efficient matrix comparison

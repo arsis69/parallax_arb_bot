@@ -11,7 +11,7 @@ print("=" * 80)
 
 
 
-KEYWORD_THRESHOLD = 2  # Minimum shared keywords to consider a match for filtering
+KEYWORD_THRESHOLD = 0  # Minimum shared keywords to consider a match for filtering
 
 PLATFORM_FILES = {
     "polymarket": "polymarket_markets.json",
@@ -91,6 +91,9 @@ def main():
                 for poly_idx, count in candidate_counts.items():
                     if count >= KEYWORD_THRESHOLD:
                         matched_poly_indices.add(poly_idx)
+            
+            if KEYWORD_THRESHOLD <= 0:
+                matched_poly_indices = set(range(len(polymarket_markets)))
 
             filtered_polymarket = [polymarket_markets[i] for i in sorted(matched_poly_indices)]
             print(f"Polymarket: {len(filtered_polymarket)} candidates (filtered from {len(polymarket_markets)}) based on Predict keywords.")
